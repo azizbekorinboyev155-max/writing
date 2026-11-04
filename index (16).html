@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Schreib mal!</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;800&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f1eff8;--card:#fff;--ink:#1e1838;--mut:#645d80;--acc:#5b3fd1;--onacc:#fff;--ok:#127a48;--bad:#d03636;--line:#dcd7ee;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14111f;--card:#1e1a2f;--ink:#ece9f8;--mut:#a39dc0;--acc:#b9a4ff;--onacc:#14111f;--ok:#3ddc97;--bad:#ff7070;--line:#322c4a}}
+:root[data-theme="dark"]{--bg:#14111f;--card:#1e1a2f;--ink:#ece9f8;--mut:#a39dc0;--acc:#b9a4ff;--onacc:#14111f;--ok:#3ddc97;--bad:#ff7070;--line:#322c4a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Outfit,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font:800 2.2rem Fraunces,Georgia,serif;letter-spacing:-.02em;margin:8px 0 2px}
+.sub{color:var(--mut);margin:0 0 18px}
+.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:16px}
+.tabs button{flex:1;border:0;background:none;color:var(--mut);font:600 .92rem Outfit,system-ui,sans-serif;padding:10px 4px;border-radius:10px;cursor:pointer}
+.tabs button.on{background:var(--acc);color:var(--onacc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
+textarea{min-height:120px;resize:vertical}
+#tx{min-height:220px;font:400 1.1rem/1.7 Fraunces,Georgia,serif}
+.btn{font:600 .95rem Outfit,system-ui,sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 14px;border-radius:12px;cursor:pointer}
+.btn.pri{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,.tabs button:focus-visible,.chip:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 .9rem Outfit,system-ui,sans-serif;padding:7px 13px;border-radius:99px;cursor:pointer}
+.chip.on{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.task{font:600 1.2rem/1.45 Fraunces,Georgia,serif;margin:4px 0 8px}
+.kw{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.kw span{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px 9px;font-weight:600}
+.meta{display:flex;justify-content:space-between;color:var(--mut);font-size:.9rem;margin:6px 0 10px}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.chk{list-style:none;padding:0;margin:0}
+.chk li{padding:6px 0;border-bottom:1px solid var(--line)}
+.chk li:last-child{border:0}
+.ok{color:var(--ok);font-weight:600}.no{color:var(--bad);font-weight:600}
+.hint{color:var(--mut);font-size:.88rem}
+.item{display:flex;align-items:flex-start;gap:10px}
+.item small{color:var(--mut)}
+.del{margin-left:auto;border:0;background:none;color:var(--mut);font-size:1.1rem;cursor:pointer;padding:6px}
+.empty{color:var(--mut);text-align:center;padding:18px}
+.wrong{font:600 1.25rem/1.45 Fraunces,Georgia,serif;margin:8px 0 12px;text-decoration:underline wavy var(--bad);text-underline-offset:5px}
+.rule{color:var(--mut);margin-top:8px}
+#toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:5}
+#toast.show{opacity:1}
+[hidden]{display:none!important}
+</style>
+</head>
+<body data-app="writing">
+<main>
+<h1>Schreib mal!</h1>
+<p class="sub">Yoz, tuzilmani tekshir, xatolaringni daftarga yigʻ va takrorla.</p>
+<div class="tabs" role="tablist">
+  <button class="on" data-tab="write">Yozish</button>
+  <button data-tab="errs" id="te">Xatolar</button>
+  <button data-tab="rev" id="tr">Takrorlash</button>
+</div>
+
+<section id="write">
+  <div class="chips" id="chips"></div>
+  <div class="card">
+    <div class="task" id="task"></div>
+    <div class="kw" id="kw"></div>
+    <div class="meta"><span id="wc"></span><span id="clock">0:00</span></div>
+    <textarea id="tx" aria-label="Matn" placeholder="Shu yerga yoz…" spellcheck="false"></textarea>
+    <div class="ctrl">
+      <button class="btn pri" id="chkBtn">Tuzilmani tekshir</button>
+      <button class="btn" id="claudeBtn">Claude bilan tekshir</button>
+      <button class="btn" id="nt">Yangi topshiriq</button>
+    </div>
+  </div>
+  <div class="card" id="res" hidden></div>
+  <div class="card" id="cp" hidden>
+    <p class="hint">Avtomatik nusxalanmadi. Quyidagini nusxalab, Claude’ga qoʻy:</p>
+    <textarea id="cpt" readonly></textarea>
+  </div>
+</section>
+
+<section id="errs" hidden>
+  <div class="card">
+    <label for="bulk">Claude javobidan xatolar blokini qoʻy</label>
+    <textarea id="bulk" placeholder="xato gap => toʻgʻri gap | qoida"></textarea>
+    <p class="hint">Har qator: xato gap =&gt; toʻgʻri gap | qoida. “Claude bilan tekshir” soʻrovi javobni aynan shu formatda beradi.</p>
+    <div class="ctrl"><button class="btn pri" id="addB">Daftarga qoʻsh</button></div>
+  </div>
+  <div id="elist"></div>
+</section>
+
+<section id="rev" hidden><div class="card" id="rv"></div></section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>(function(){
+var LS=null;try{LS=window.localStorage}catch(e){}
+var LANGKEY='lm_lang',LV=['A1','A2','B1','B2','C1','C2'];
+var code='de';try{var sv=LS&&LS.getItem(LANGKEY);if(sv==='en'||sv==='ko'||sv==='de')code=sv}catch(e){}
+var RAW={
+de:{
+A1:"das Haus=uy;die Wohnung=kvartira;das Zimmer=xona;die Küche=oshxona;der Tisch=stol;der Stuhl=stul;das Bett=karavot;die Tür=eshik;das Fenster=deraza;das Wasser=suv;das Brot=non;der Apfel=olma;die Milch=sut;der Kaffee=qahva;der Tee=choy;die Mutter=ona;der Vater=ota;das Kind=bola;der Freund=doʻst;die Schule=maktab;das Buch=kitob;die Stadt=shahar;das Auto=mashina;gehen=bormoq;kommen=kelmoq;essen=yemoq;trinken=ichmoq;wohnen=yashamoq;gut=yaxshi;groß=katta;klein=kichik;heute=bugun;morgen=ertaga;danke=rahmat",
+A2:"die Arbeit=ish;der Beruf=kasb;das Wetter=ob-havo;die Reise=sayohat;der Bahnhof=vokzal;das Geschäft=doʻkon;der Arzt=shifokor;die Gesundheit=sogʻliq;das Geld=pul;die Zeit=vaqt;die Woche=hafta;das Wochenende=dam olish kunlari;kaufen=sotib olmoq;arbeiten=ishlamoq;lernen=oʻrganmoq;spielen=oʻynamoq;fahren=(transportda) yurmoq;schlafen=uxlamoq;besuchen=tashrif buyurmoq;brauchen=kerak boʻlmoq;schwer=qiyin;leicht=oson;teuer=qimmat;billig=arzon;schön=chiroyli;müde=charchagan",
+B1:"die Erfahrung=tajriba;die Meinung=fikr;der Vorteil=afzallik;der Nachteil=kamchilik;die Umwelt=atrof-muhit;die Gesellschaft=jamiyat;die Ausbildung=kasbiy taʼlim;der Unterschied=farq;das Ziel=maqsad;entscheiden=qaror qilmoq;erklären=tushuntirmoq;vergleichen=solishtirmoq;verbessern=yaxshilamoq;vermeiden=qochmoq, oldini olmoq;verändern=oʻzgartirmoq;wichtig=muhim;wahrscheinlich=ehtimol;eigentlich=aslida;trotzdem=shunga qaramay;deshalb=shuning uchun;obwohl=garchi;sich entwickeln=rivojlanmoq;sich erinnern=eslamoq;erreichen=erishmoq",
+B2:"die Entwicklung=rivojlanish;die Verantwortung=masʼuliyat;die Voraussetzung=old shart;die Auswirkung=taʼsir, oqibat;der Zusammenhang=bogʻliqlik;die Herausforderung=sinov;die Fähigkeit=qobiliyat;die Maßnahme=chora;behaupten=daʼvo qilmoq;beeinflussen=taʼsir qilmoq;berücksichtigen=eʼtiborga olmoq;ausreichend=yetarli;umstritten=bahsli;erheblich=sezilarli;vorhanden=mavjud;zunehmend=tobora ortib borayotgan;hingegen=aksincha;gewährleisten=kafolatlamoq;beziehungsweise=yoki (mos ravishda)",
+C1:"die Nachhaltigkeit=barqarorlik;der Wettbewerb=raqobat;das Ausmaß=koʻlam;die Bedingung=shart;die Wahrnehmung=idrok;anstreben=intilmoq;widerspiegeln=aks ettirmoq;hinterfragen=shubha ostiga olmoq;bewältigen=uddalamoq;maßgeblich=hal qiluvchi;unabdingbar=zarur;ungeachtet=qaramasdan;infolgedessen=natijada;demzufolge=shunga koʻra;die Mehrsprachigkeit=koʻp tillilik",
+C2:"die Ambivalenz=ikkilanuvchanlik;die Nuance=nozik farq;der Paradigmenwechsel=paradigma oʻzgarishi;das Spannungsfeld=ziddiyatli maydon;verinnerlichen=chuqur singdirmoq;relativieren=nisbiylashtirmoq;vorherrschend=ustun;allgegenwärtig=hamma joyda mavjud;schlüssig=mantiqli;nichtsdestotrotz=shunga qaramay;die Privatsphäre=shaxsiy daxlsizlik;die Identität=oʻzlik"},
+en:{
+A1:"house=uy;room=xona;kitchen=oshxona;table=stol;chair=stul;bed=karavot;door=eshik;window=deraza;water=suv;bread=non;apple=olma;milk=sut;coffee=qahva;tea=choy;mother=ona;father=ota;child=bola;friend=doʻst;school=maktab;book=kitob;city=shahar;car=mashina;name=ism;come=kelmoq;drink=ichmoq;live=yashamoq;good=yaxshi;small=kichik;today=bugun;tomorrow=ertaga;thanks=rahmat;family=oila;morning=ertalab;happy=xursand",
+A2:"work=ish;job=kasb;weather=ob-havo;trip=sayohat;station=vokzal;shop=doʻkon;doctor=shifokor;health=sogʻliq;money=pul;time=vaqt;week=hafta;weekend=dam olish kunlari;buy=sotib olmoq;study=oʻqimoq;play=oʻynamoq;sleep=uxlamoq;visit=tashrif buyurmoq;need=kerak boʻlmoq;difficult=qiyin;easy=oson;expensive=qimmat;cheap=arzon;beautiful=chiroyli;tired=charchagan",
+B1:"experience=tajriba;opinion=fikr;advantage=afzallik;disadvantage=kamchilik;environment=atrof-muhit;society=jamiyat;education=taʼlim;difference=farq;goal=maqsad;decide=qaror qilmoq;explain=tushuntirmoq;compare=solishtirmoq;improve=yaxshilamoq;avoid=qochmoq;change=oʻzgartirmoq;important=muhim;probably=ehtimol;actually=aslida;however=biroq;therefore=shuning uchun;although=garchi;develop=rivojlanmoq;remember=eslamoq;succeed=muvaffaq boʻlmoq",
+B2:"development=rivojlanish;responsibility=masʼuliyat;requirement=talab;impact=taʼsir;challenge=sinov;ability=qobiliyat;measure=chora;claim=daʼvo qilmoq;influence=taʼsir qilmoq;consider=eʼtiborga olmoq;achieve=erishmoq;sufficient=yetarli;controversial=bahsli;significant=sezilarli;available=mavjud;increasingly=tobora;whereas=holbuki;nevertheless=shunga qaramay;ensure=taʼminlamoq",
+C1:"sustainability=barqarorlik;competition=raqobat;extent=daraja;perception=idrok;pursue=intilmoq;reflect=aks ettirmoq;scrutinize=sinchiklab tekshirmoq;overcome=yengib oʻtmoq;crucial=hal qiluvchi;indispensable=ajralmas;regardless=qaramasdan;consequently=natijada;accordingly=shunga muvofiq;multilingualism=koʻp tillilik;privacy=shaxsiy daxlsizlik",
+C2:"ambivalence=ikkilanuvchanlik;nuance=nozik farq;paradigm=paradigma;tension=ziddiyat;internalize=chuqur singdirmoq;mitigate=yumshatmoq;prevailing=ustun;ubiquitous=hamma joyda mavjud;coherent=izchil;notwithstanding=qaramasdan;identity=oʻzlik;preserve=asramoq"},
+ko:{
+A1:"집=uy;방=xona;부엌=oshxona;책상=yozuv stoli;의자=stul;침대=karavot;문=eshik;창문=deraza;물=suv;빵=non;사과=olma;우유=sut;커피=qahva;차=choy;엄마=ona;아빠=ota;아이=bola;친구=doʻst;학교=maktab;책=kitob;도시=shahar;자동차=mashina;가다=bormoq;오다=kelmoq;먹다=yemoq;마시다=ichmoq;살다=yashamoq;좋다=yaxshi boʻlmoq;크다=katta boʻlmoq;작다=kichik boʻlmoq;오늘=bugun;내일=ertaga;감사합니다=rahmat;가족=oila",
+A2:"일=ish;직업=kasb;날씨=ob-havo;여행=sayohat;가게=doʻkon;의사=shifokor;건강=sogʻliq;돈=pul;시간=vaqt;주말=dam olish kunlari;사다=sotib olmoq;일하다=ishlamoq;공부하다=oʻqimoq;놀다=oʻynamoq;자다=uxlamoq;방문하다=tashrif buyurmoq;필요하다=kerak boʻlmoq;어렵다=qiyin;쉽다=oson;비싸다=qimmat;싸다=arzon;예쁘다=chiroyli;피곤하다=charchagan boʻlmoq;기차역=temir yoʻl stansiyasi",
+B1:"경험=tajriba;의견=fikr;장점=afzallik;단점=kamchilik;환경=atrof-muhit;사회=jamiyat;교육=taʼlim;차이=farq;목표=maqsad;결정하다=qaror qilmoq;설명하다=tushuntirmoq;비교하다=solishtirmoq;개선하다=yaxshilamoq;피하다=qochmoq;바꾸다=oʻzgartirmoq;중요하다=muhim boʻlmoq;아마=ehtimol;사실=aslida;하지만=ammo;그래서=shuning uchun;비록=garchi;발전하다=rivojlanmoq;기억하다=eslamoq;성공하다=muvaffaq boʻlmoq",
+B2:"발전=rivojlanish;책임=masʼuliyat;조건=shart;영향=taʼsir;도전=sinov;능력=qobiliyat;대책=chora;주장하다=daʼvo qilmoq;고려하다=eʼtiborga olmoq;달성하다=erishmoq;충분하다=yetarli;논란=bahs;상당하다=sezilarli;가능하다=mumkin boʻlmoq;점점=tobora;반면=aksincha;그럼에도=shunga qaramay;보장하다=kafolatlamoq",
+C1:"지속가능성=barqarorlik;경쟁=raqobat;범위=koʻlam;인식=idrok;추구하다=intilmoq;반영하다=aks ettirmoq;극복하다=yengib oʻtmoq;결정적=hal qiluvchi;필수적=zarur;불구하고=qaramasdan;결과적으로=natijada;따라서=shuning uchun;다국어=koʻp tillilik",
+C2:"양면성=ikki yoqlamalik;미묘한 차이=nozik farq;패러다임 전환=paradigma oʻzgarishi;긴장=ziddiyat;내면화하다=chuqur singdirmoq;완화하다=yumshatmoq;지배적=ustun;포괄적=keng qamrovli;일관성=izchillik;정체성=oʻzlik;사생활=shaxsiy hayot"}
+};
+var CFG={
+de:{code:'de',sr:'de-DE',tts:'de',uz:'nemis',minw:5,sw:6,pre:4,wf:1,sub:false,
+ con:['und','aber','oder','denn','weil','dass','wenn','als','obwohl','damit','deshalb','deswegen','außerdem','trotzdem','zwar','dennoch','hingegen','jedoch','einerseits','andererseits','sodass','infolgedessen','demnach','somit','also','dagegen','sondern','während','bevor','nachdem','falls','folglich','allerdings','wohingegen','mithin','nichtsdestotrotz'],
+ q:{
+A1:['Wie heißt du und woher kommst du?','Was isst du gern zum Frühstück?','Wie ist dein Tag heute?','Hast du Geschwister? Erzähl kurz.'],
+A2:['Was hast du gestern gemacht?','Beschreibe deine Wohnung oder dein Zimmer.','Was machst du am Wochenende gern?','Wie kommst du zur Uni oder zur Arbeit?'],
+B1:['Erzähl von einer Reise, die dir gefallen hat.','Was sind die Vor- und Nachteile von Online-Unterricht?','Welchen Beruf möchtest du später haben und warum?','Was machst du, wenn du Stress hast?'],
+B2:['Sollte man in der Schule mehr Programmieren lernen? Begründe deine Meinung.','Wie hat das Smartphone unser Leben verändert?','Was bedeutet für dich ein gutes Leben?','Sollte man Fast Food stärker besteuern?'],
+C1:['Inwiefern prägt Technologie die Art, wie wir Beziehungen führen?','Welche Rolle sollte künstliche Intelligenz in der Bildung spielen?','Wie lässt sich Wirtschaftswachstum mit Umweltschutz vereinbaren?','Ist Mehrsprachigkeit ein Vorteil auf dem Arbeitsmarkt?'],
+C2:['Erörtere, ob kulturelle Identität in einer globalisierten Welt bewahrt werden kann.','Inwieweit ist Privatsphäre im digitalen Zeitalter noch zu verteidigen?','Worin liegt der Wert der Muttersprache für das Denken?','Kann Kunst politisch wirksam sein, ohne ihre Eigenständigkeit zu verlieren?']
+},
+ packs:[{t:'Salomlashuv va kundalik gaplar',lv:'A1',l:['Guten Morgen! Wie geht es dir?','Ich heiße Ali und ich komme aus Usbekistan.','Ich lerne seit einem Jahr Deutsch.','Kannst du das bitte wiederholen?','Ich möchte einen Kaffee, bitte.','Wo ist der Bahnhof?','Heute ist das Wetter sehr schön.','Vielen Dank für Ihre Hilfe.']}],
+ sample:[{t:'Meine Familie',lv:'A1',tx:'Das ist meine Familie. Mein Vater arbeitet in einer Schule. Meine Mutter ist Ärztin. Wir wohnen in einer kleinen Wohnung in der Stadt. Am Wochenende besuchen wir meine Großeltern und essen zusammen.'}]},
+en:{code:'en',sr:'en-US',tts:'en',uz:'ingliz',minw:5,sw:6,pre:3,wf:1,sub:false,
+ con:['and','but','or','because','so','that','if','when','although','though','while','however','therefore','moreover','furthermore','nevertheless','whereas','since','unless','besides','otherwise','consequently','meanwhile','instead','yet','then','also','thus','hence','despite'],
+ q:{A1:['What is your name and where are you from?','What do you like to eat for breakfast?'],A2:['What did you do yesterday?','Describe your room or your home.'],B1:['Tell me about a trip you enjoyed.','What are the pros and cons of online learning?'],B2:['Should schools teach more programming? Explain your opinion.','How has the smartphone changed our lives?'],C1:['To what extent does technology shape the way we build relationships?','What role should artificial intelligence play in education?'],C2:['Can cultural identity be preserved in a globalized world? Discuss.','To what extent can privacy still be defended in the digital age?']},
+ packs:[{t:'Salomlashuv va kundalik gaplar',lv:'A1',l:['Good morning! How are you?','My name is Ali and I am from Uzbekistan.','I have been learning English for a year.','Could you please repeat that?','I would like a coffee, please.','Where is the train station?','The weather is really nice today.','Thank you very much for your help.']}],
+ sample:[{t:'My family',lv:'A1',tx:'This is my family. My father works in a school. My mother is a doctor. We live in a small flat in the city. At the weekend we visit my grandparents and eat together.'}]},
+ko:{code:'ko',sr:'ko-KR',tts:'ko',uz:'koreys',minw:2,sw:3,pre:1,wf:.6,sub:true,
+ con:['그리고','그래서','하지만','그러나','그런데','그러면','그러므로','따라서','또한','그렇지만','왜냐하면','때문에','지만','니까','면서','는데','아서','어서','으면','려고','반면','그럼에도','비록','게다가','결과적으로'],
+ q:{A1:['이름이 뭐예요? 어디에서 왔어요?','아침에 뭘 먹어요?'],A2:['어제 뭐 했어요?','방이나 집을 설명해 보세요.'],B1:['기억에 남는 여행에 대해 이야기해 보세요.','온라인 수업의 장점과 단점은 무엇이라고 생각해요?'],B2:['학교에서 프로그래밍을 더 가르쳐야 한다고 생각하세요? 이유를 말해 보세요.','스마트폰이 우리의 삶을 어떻게 바꾸었나요?'],C1:['기술은 인간관계를 맺는 방식에 어느 정도 영향을 미칩니까?','교육에서 인공지능은 어떤 역할을 해야 한다고 생각하십니까?'],C2:['세계화 시대에 문화적 정체성을 지킬 수 있을까요? 논의해 보세요.','디지털 시대에 사생활을 어디까지 지킬 수 있다고 보십니까?']},
+ packs:[{t:'Salomlashuv va kundalik gaplar',lv:'A1',l:['안녕하세요! 잘 지내세요?','제 이름은 알리이고 우즈베키스탄에서 왔어요.','저는 일 년 동안 한국어를 공부했어요.','다시 한번 말씀해 주시겠어요?','커피 한 잔 주세요.','기차역이 어디에 있어요?','오늘 날씨가 정말 좋아요.','도와주셔서 정말 감사합니다.']}],
+ sample:[{t:'우리 가족',lv:'A1',tx:'이 사람은 우리 가족이에요. 아버지는 학교에서 일해요. 어머니는 의사예요. 우리는 도시의 작은 집에 살아요. 주말에는 할머니와 할아버지를 방문해서 같이 밥을 먹어요.'}]}
+};
+var cfg=CFG[code];
+var db=[];
+LV.forEach(function(lv){String(RAW[code][lv]||'').split(';').forEach(function(p){
+  if(!p.trim())return;var i=p.indexOf('=');if(i<0)return;
+  var w=p.slice(0,i).trim(),t=p.slice(i+1).trim(),b=w.replace(/^(der|die|das)\s+/,'').replace(/^sich\s+/,'');
+  var k=b.toLowerCase().replace(/ß/g,'ss'),s=k;
+  if(code==='de'&&b===w){if(/(eln|ern)$/.test(k)&&k.length>5)s=k.slice(0,-1);else if(/en$/.test(k)&&k.length>=5)s=k.slice(0,-2)}
+  if(code==='ko'&&/다$/.test(k))s=k.slice(0,-1);
+  db.push({w:w,b:b,k:k,s:s,t:t,lv:lv});
+})});
+var idx={},sidx={};
+db.forEach(function(e){if(!idx[e.k])idx[e.k]=e;if(e.s!==e.k&&!sidx[e.s])sidx[e.s]=e});
+function koLookup(lc){
+  var best=null;
+  db.forEach(function(e){
+    var key=e.s;if(!key||lc.indexOf(key)!==0)return;
+    var rest=lc.slice(key.length);
+    var ok=key.length===1?/^(요|세요|어요|아요|해요|어|아|는|은|이|가|를|을|에|에서|도|의|로|와|과|만|고|서|면|지만|니까|습니다|었어요|았어요)?$/.test(rest):rest.length<=4;
+    if(ok&&(!best||key.length>best.s.length))best=e;
+  });
+  return best;
+}
+function lookup(tok){
+  var lc=String(tok).toLowerCase().replace(/ß/g,'ss');
+  if(idx[lc])return idx[lc];
+  if(code==='ko')return koLookup(lc);
+  var c=code==='de'
+    ?[lc.replace(/(en|er|es|e|n|s|t|st|te)$/,''),lc.replace(/(en|e|st|t|te|ten)$/,'')]
+    :[lc.replace(/s$/,''),lc.replace(/es$/,''),lc.replace(/(ing|ed)$/,''),lc.replace(/(ing|ed)$/,'e'),lc.replace(/ies$/,'y'),lc.replace(/ied$/,'y')];
+  for(var i=0;i<c.length;i++){if(c[i]!==lc&&c[i].length>=2){if(idx[c[i]])return idx[c[i]];if(sidx[c[i]])return sidx[c[i]]}}
+  return null;
+}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function pick(lv,n){
+  var min=code==='ko'?2:3;
+  var pool=db.filter(function(e){return e.lv===lv&&e.s.length>=min&&e.b.indexOf(' ')<0});
+  if(pool.length<n)pool=db.filter(function(e){return e.s.length>=min&&e.b.indexOf(' ')<0});
+  return shuf(pool).slice(0,n);
+}
+function used(e,low,text){
+  if(code==='ko')return text.indexOf(e.s)>-1;
+  return low.some(function(w){return w.indexOf(e.s)===0});
+}
+function longWords(s){return String(s).match(new RegExp('[\\p{L}]{'+cfg.minw+',}','gu'))||[]}
+function key(base){
+  var nk=base+'_v2_'+code;
+  try{if(LS&&code==='de'&&LS.getItem(nk)===null&&LS.getItem(base+'_v1')!==null)LS.setItem(nk,LS.getItem(base+'_v1'))}catch(e){}
+  return nk;
+}
+var TITLES={speaking:{de:'Sprich mal!',en:'Speak up!',ko:'말해요!'},reading:{de:'Lies mal!',en:'Read on!',ko:'읽어요!'},writing:{de:'Schreib mal!',en:'Write it!',ko:'써요!'}};
+var NAMES={de:'Deutsch',en:'English',ko:'한국어'};
+window.LM={code:code,cfg:cfg,db:db,levels:LV,lookup:lookup,pick:pick,used:used,long:longWords,key:key};
+var css=document.createElement('style');
+css.textContent='.lm-bar{display:flex;gap:6px;margin:0 0 14px}.lm-bar button{flex:1;border:1px solid var(--line,#ccc);background:var(--card,#fff);color:var(--ink,#111);font:600 .95rem system-ui,sans-serif;padding:9px 6px;border-radius:12px;cursor:pointer}.lm-bar button.on{background:var(--acc,#2447d4);color:var(--onacc,#fff);border-color:var(--acc,#2447d4)}.lm-bar button:focus-visible{outline:3px solid var(--acc,#2447d4);outline-offset:2px}';
+document.head.appendChild(css);
+var app=document.body.getAttribute('data-app'),h1=document.querySelector('h1'),sub=document.querySelector('.sub');
+if(app&&TITLES[app]){document.title=TITLES[app][code];if(h1)h1.textContent=TITLES[app][code]}
+if(sub){
+  var bar=document.createElement('div');bar.className='lm-bar';bar.setAttribute('role','group');bar.setAttribute('aria-label','Til');
+  ['de','en','ko'].forEach(function(c){
+    var b=document.createElement('button');b.type='button';b.textContent=NAMES[c];b.setAttribute('data-lang',c);
+    if(c===code)b.className='on';
+    b.onclick=function(){if(c===code)return;try{LS.setItem(LANGKEY,c)}catch(e){}location.reload()};
+    bar.appendChild(b);
+  });
+  sub.parentNode.insertBefore(bar,sub.nextSibling);
+}
+})();
+</script>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)},LM=window.LM,KEY=LM.key('schreibmal'),st={lvl:'A1',draft:'',errs:[]};
+try{var p=JSON.parse(localStorage.getItem(KEY));if(p)st=p}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+var tt;function toast(m){var t=$('#toast');t.textContent=m;t.className='show';clearTimeout(tt);tt=setTimeout(function(){t.className=''},2600)}
+var DAY=864e5,INT=[0,1,2,4,8,16,32];
+function today(){return Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/DAY)}
+function wl(s){return s.match(/[\p{L}][\p{L}'’\-]*/gu)||[]}
+function badges(){var d=st.errs.filter(function(e){return e.due<=today()}).length;$('#te').textContent='Xatolar ('+st.errs.length+')';$('#tr').textContent='Takrorlash ('+d+')'}
+
+/* topshiriqlar */
+var P={
+A1:{min:30,con:1,t:[['Oʻzingni tanishtir: ismingni, yoshingni, qayerda yashashingni va hobbingni yoz.',['heiße','wohne','gern']],['Odatiy kuningni ertalabdan kechgacha yoz.',['stehe','esse','abends']],['Oilangni tasvirla.',['Mutter','Vater','hat']]]},
+A2:{min:50,con:2,t:[['Doʻstingga xat yoz: dam olish kunlaring qanday oʻtdi?',['gestern','weil','war']],['Uying yoki xonangni tasvirla va nimasi yoqishini yoz.',['Zimmer','gibt','gefällt']],['Restoranda stol band qilish uchun xabar yoz.',['möchte','Tisch','Uhr']]]},
+B1:{min:80,con:3,t:[['Onlayn taʼlimning ijobiy va salbiy tomonlari haqida fikringni yoz.',['Vorteil','Nachteil','deshalb']],['Eslab qolgan safaringni oʻtgan zamonda hikoya qil.',['Reise','hatte','danach']],['Kelajakdagi kasbingni va uni nega tanlaganingni tushuntir.',['Beruf','möchte','damit']]]},
+B2:{min:120,con:4,t:[['Maktabda dasturlashni koʻproq oʻrgatish kerakmi? Fikringni asosla.',['Argument','außerdem','trotzdem']],['Smartfon hayotimizni qanday oʻzgartirdi? Muhokama qil.',['Einfluss','Abhängigkeit','sodass']],['Xizmat yomon boʻlgani uchun rasmiy shikoyat xati yoz.',['beschweren','Erstattung','geehrte']]]},
+C1:{min:160,con:5,t:[['Sunʼiy intellektning taʼlimdagi oʻrnini tahlil qil.',['zwar','hingegen','Voraussetzung']],['Iqtisodiy oʻsish va ekologiya muvozanati haqida esse yoz.',['Nachhaltigkeit','dennoch','infolgedessen']],['Koʻp tillilik ish bozorida afzallikmi? Dalillar bilan yoz.',['Mehrsprachigkeit','Wettbewerb','demnach']]]},
+C2:{min:200,con:5,t:[['Globallashuv sharoitida madaniy oʻziga xoslikni saqlash mumkinmi? Esse yoz.',['Identität','nichtsdestotrotz','inwiefern']],['Raqamli davrda shaxsiy daxlsizlik himoya qilinishi mumkinmi?',['Privatsphäre','gewährleisten','mithin']],['Ona tilining tafakkurdagi oʻrni haqida mulohaza yoz.',['Muttersprache','prägen','wohingegen']]]}
+};
+var CON=LM.cfg.con;
+var cur=null,t0=null,tick=null;
+function drawChips(){$('#chips').innerHTML=Object.keys(P).map(function(l){return'<button class="chip'+(l===st.lvl?' on':'')+'" data-l="'+l+'">'+l+'</button>'}).join('')}
+$('#chips').onclick=function(e){var c=e.target.closest('[data-l]');if(c){st.lvl=c.dataset.l;save();drawChips();newTask()}};
+function newTask(){
+  var L=P[st.lvl],pick=shuf(L.t).filter(function(x){return !cur||x[0]!==cur.q})[0];
+  cur={q:pick[0],w:LM.pick(st.lvl,3)};st.cur=cur;
+  showTask();
+  $('#tx').value='';st.draft='';save();$('#res').hidden=true;$('#cp').hidden=true;
+  clearInterval(tick);tick=null;t0=null;$('#clock').textContent='0:00';count();
+}
+function showTask(){
+  $('#task').textContent=cur.q;
+  $('#kw').innerHTML=cur.w.map(function(e){return'<span title="'+esc(e.t)+'">'+esc(e.b)+' · '+esc(e.t)+'</span>'}).join('');
+}
+function minW(){return Math.round(P[st.lvl].min*LM.cfg.wf)}
+function count(){var n=wl($('#tx').value).length;$('#wc').textContent=n+' / '+minW()+' soʻz'}
+$('#tx').oninput=function(){
+  count();st.draft=this.value;save();
+  if(!t0){t0=Date.now();tick=setInterval(function(){var s=Math.floor((Date.now()-t0)/1000);$('#clock').textContent=Math.floor(s/60)+':'+('0'+s%60).slice(-2)},1000)}
+};
+$('#nt').onclick=function(){if($('#tx').value.trim().length>20&&!confirm('Yozgan matningiz oʻchadi. Yangi topshiriq olinsinmi?'))return;newTask()};
+
+/* tuzilma tekshiruvi */
+function li(ok,txt){return'<li><span class="'+(ok?'ok':'no')+'">'+(ok?'✓':'✗')+'</span> '+txt+'</li>'}
+$('#chkBtn').onclick=function(){
+  var text=$('#tx').value.trim();
+  if(!text){toast('Avval yozing.');return}
+  var C=LM.cfg,L=P[st.lvl],min=minW(),ws=wl(text),low=ws.map(function(w){return w.toLowerCase().replace(/ß/g,'ss')}),n=ws.length,h='';
+  h+=li(n>=min,'Soʻzlar soni: '+n+' (kamida '+min+')');
+  var miss=cur.w.filter(function(e){return !LM.used(e,low,text)});
+  h+=li(!miss.length,'Berilgan soʻzlar: '+(cur.w.length-miss.length)+' / '+cur.w.length+(miss.length?' — ishlatilmadi: '+esc(miss.map(function(e){return e.b}).join(', ')):''));
+  var cs=CON.filter(function(c){c=c.replace(/ß/g,'ss');return C.sub?text.indexOf(c)>-1:low.indexOf(c)>-1});
+  h+=li(cs.length>=L.con,'Bogʻlovchilar: '+cs.length+' xil (kamida '+L.con+')'+(cs.length?' — '+esc(cs.join(', ')):''));
+  var S=(text.match(/[^.!?\n]+[.!?]*/g)||[]).map(function(s){return s.trim()}).filter(Boolean);
+  var fw={},mx=0,mw='';S.forEach(function(s){var f=(wl(s)[0]||'').toLowerCase();fw[f]=(fw[f]||0)+1;if(fw[f]>mx){mx=fw[f];mw=f}});
+  h+=li(S.length<3||mx/S.length<=.5,'Gaplar xilma-xilligi'+(S.length>=3&&mx/S.length>.5?': '+mx+' ta gap “'+esc(mw)+'” bilan boshlanadi, boshqacha boshlab koʻring':': yaxshi'));
+  var low1=S.filter(function(s){var c=s.charAt(0);return c!==c.toUpperCase()}).length;
+  h+=li(low1===0&&/[.!?]$/.test(text),(C.code==='ko'?'Gap oxirida tinish belgisi':'Gap boshi katta harf va oxirida tinish belgisi')+(low1?': '+low1+' ta gap kichik harf bilan boshlangan':''));
+  if(C.code==='en'){var badI=/(^|[\s(])i($|[\s'’,.!?])/.test(text);h+=li(!badI,'“I” har doim katta harf bilan yoziladi'+(badI?': kichik “i” topildi':''))}
+  if(C.code==='ko'){
+    var po=S.filter(function(s){return /요[.!?]?$/.test(s)}).length,fo=S.filter(function(s){return /니다[.!?]?$/.test(s)}).length;
+    h+=li(!(po&&fo),'Gap oxiri uslubi bir xil'+(po&&fo?': “-요” va “-습니다” aralash, bittasini tanlang':': yaxshi'));
+  }
+  $('#res').innerHTML='<ul class="chk">'+h+'</ul><p class="hint">Bu tekshiruv grammatikani emas, tuzilmani koʻradi. Grammatika uchun “Claude bilan tekshir” tugmasini bos.</p>';
+  $('#res').hidden=false;$('#res').scrollIntoView({behavior:'smooth'});
+};
+
+/* Claude'ga yuborish */
+$('#claudeBtn').onclick=function(){
+  var text=$('#tx').value.trim();
+  if(!text){toast('Avval yozing.');return}
+  var q='Men '+LM.cfg.uz+' tilini oʻrganyapman, darajam: '+st.lvl+'. Topshiriq: '+cur.q+'\n\nQuyidagi matnimni tekshir:\n1) Avval 3 ta kuchli tomonimni ayt.\n2) Keyin barcha xatolarni bitta kod blokida, har bir xato yangi qatorda, aynan shu formatda ber (boshqa hech narsa qoʻshma):\nxato gap => toʻgʻri gap | qoida (oʻzbekcha, 1 jumla)\n3) Oxirida matnimning yaxshilangan versiyasini ber va eng koʻp takrorlangan xato turini ayt.\n\nMatnim:\n'+text;
+  var fb=function(){$('#cpt').value=q;$('#cp').hidden=false;$('#cp').scrollIntoView({behavior:'smooth'})};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(q).then(function(){toast('Nusxalandi. Claude’da qoʻying.')},fb)}else fb();
+  var win=window.open('https://claude.ai/new','_blank');
+  if(!win)fb();
+};
+
+/* xatolar daftari */
+function norm(s){return s.toLowerCase().replace(/ß/g,'ss').replace(/['’ʼ`]/g,'').replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim()}
+$('#addB').onclick=function(){
+  var add=0,dup=0;
+  $('#bulk').value.split('\n').forEach(function(line){
+    line=line.replace(/^[\s\-*•\d.)`]+/,'').replace(/`+$/,'').trim();
+    var mm=line.match(/=>|→|->/);if(!mm)return;var i=mm.index;
+    var a=line.slice(0,i).trim(),rest=line.slice(i+mm[0].length),j=rest.lastIndexOf('|'),b=(j<0?rest:rest.slice(0,j)).trim(),r=j<0?'':rest.slice(j+1).trim();
+    if(!a||!b)return;if(st.errs.some(function(e){return norm(e.w)===norm(a)})){dup++;return}
+    st.errs.push({w:a,c:b,r:r,box:0,due:today()});add++;
+  });
+  if(!add){toast(dup?'Bu xatolar daftarda allaqachon bor.':'Format topilmadi: xato => toʻgʻri | qoida');return}
+  save();badges();$('#bulk').value='';drawErrs();toast(add+' ta xato qoʻshildi.');
+};
+function drawErrs(){
+  var el=$('#elist');
+  if(!st.errs.length){el.innerHTML='<div class="empty">Daftar boʻsh. Matnni Claude’ga tekshirtirib, xatolar blokini bu yerga qoʻying.</div>';return}
+  el.innerHTML=st.errs.slice().reverse().map(function(e){var k=st.errs.indexOf(e);return'<div class="card item"><div><b>'+esc(e.w)+'</b><br>→ '+esc(e.c)+'<br><small>'+esc(e.r)+'</small></div><button class="del" data-x="'+k+'" aria-label="Oʻchirish">✕</button></div>'}).join('');
+}
+$('#elist').onclick=function(e){var d=e.target.closest('[data-x]');if(d){st.errs.splice(+d.dataset.x,1);save();badges();drawErrs()}};
+
+/* takrorlash: xato gapni toʻgʻrilab yoz */
+var queue=[],card=null;
+function startRev(){queue=shuf(st.errs.filter(function(e){return e.due<=today()}));nextCard()}
+function nextCard(){
+  badges();card=queue.shift();var el=$('#rv');
+  if(!card){el.innerHTML='<div class="empty">'+(st.errs.length?'Bugungi takrorlash tugadi. Barakalla!':'Avval xatolar daftarini toʻldiring.')+'</div>';return}
+  el.innerHTML='<div class="hint">Qolgan: '+(queue.length+1)+' · bu gapdagi xatoni toʻgʻrilab yoz</div><div class="wrong">'+esc(card.w)+'</div><input id="ans" autocomplete="off" aria-label="Toʻgʻri variant" placeholder="Toʻgʻri variant…"><div id="fb"></div><div class="ctrl"><button class="btn pri" id="go">Tekshir</button></div>';
+  $('#ans').focus();
+  var go=function(){
+    var ok=norm($('#ans').value)===norm(card.c);
+    card.box=ok?Math.min(card.box+1,6):0;card.due=ok?today()+INT[card.box]:today();
+    if(!ok)queue.push(card);save();
+    $('#fb').innerHTML='<p><span class="'+(ok?'ok':'no')+'">'+(ok?'✓ Toʻgʻri':'✗ Toʻgʻrisi:')+'</span> '+(ok?'':esc(card.c))+'</p><p class="rule">'+esc(card.r)+'</p>';
+    $('#ans').disabled=true;
+    var b=$('#go');b.textContent='Keyingi';b.onclick=nextCard;
+  };
+  $('#go').onclick=go;
+  $('#ans').onkeydown=function(e){if(e.key==='Enter'&&!$('#ans').disabled)go()};
+}
+
+/* tablar */
+document.querySelectorAll('[data-tab]').forEach(function(b){b.onclick=function(){
+  document.querySelectorAll('[data-tab]').forEach(function(x){x.classList.toggle('on',x===b)});
+  ['write','errs','rev'].forEach(function(id){$('#'+id).hidden=id!==b.dataset.tab});
+  if(b.dataset.tab==='errs')drawErrs();if(b.dataset.tab==='rev')startRev();
+}});
+
+drawChips();badges();
+if(st.cur&&st.cur.q&&P[st.lvl]&&st.cur.w&&st.cur.w[0]&&typeof st.cur.w[0]==='object'){cur=st.cur;showTask();$('#tx').value=st.draft||'';count()}else newTask();
+})();
+</script>
+</body>
+</html>
